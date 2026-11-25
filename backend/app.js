@@ -26,15 +26,19 @@ app.use(
 );
 
 // CORS configuration
-const allowedOrigins = (process.env.CORS_ORIGINS || process.env.CLIENT_URL || 'http://localhost:5173')
+const allowedOrigins = (process.env.CORS_ORIGINS || process.env.CLIENT_URL || 'http://localhost:5173,http://localhost:5174')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean);
 
+const isLocalDevOrigin = (origin) =>
+  process.env.NODE_ENV !== 'production' &&
+  /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
+
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin) || isLocalDevOrigin(origin)) {
         return callback(null, true);
       }
       // Allow Vercel preview deployments if configured
